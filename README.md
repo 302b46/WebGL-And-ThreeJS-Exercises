@@ -1,1 +1,1 @@
-# WebGL-mini-projects
+# WebGL-And-ThreeJS-Exercises
