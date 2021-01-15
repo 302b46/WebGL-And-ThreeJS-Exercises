@@ -1,0 +1,136 @@
+<html>
+<head>
+  <style>
+  	canvas { width: 100%; height:100%; }
+  </style>
+</head>
+<body>
+  <script src="lib/three.min.js"></script>
+  <script src="lib/OrbitControls.js"></script>
+
+  <script>
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight, 0.1,1000);
+  var renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0xffffff);
+  document.body.appendChild(renderer.domElement);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+
+  camera.position.z = 20;
+
+  //to show the rotating shape when resizing
+
+  window.addEventListener('resize',function()
+  {
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    renderer.setSize(width, height);
+    camera.aspect = width/height;
+    camera.updateProjectionMatrix();
+
+  });
+
+
+//creating the shapes
+
+  var cubeGeometry = new THREE.BoxGeometry(2,2,2);
+  var cubeMaterial = new THREE.MeshBasicMaterial({color: 'rgb(128,0,0)'});
+  var cube = new THREE.Mesh(cubeGeometry,cubeMaterial);
+  cube.translateX(0).translateY(2).translateZ(0);
+
+  scene.add(cube);
+
+  var sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
+  var sphereMaterial = new THREE.MeshBasicMaterial({color:'rgb(25,25,112)'});
+  var sphere = new THREE.Mesh(sphereGeometry,sphereMaterial);
+  sphere.translateX(0).translateY(2).translateZ(0);
+  scene.add(sphere);
+
+
+  var planeGeometry = new THREE.PlaneGeometry(8,8);
+	var planeMaterial = new THREE.MeshBasicMaterial({color:'rgb(75,0,130)',  side:THREE.DoubleSide});
+	var plane = new THREE.Mesh(planeGeometry,planeMaterial);
+  plane.translateZ(-1.0);
+  plane.scale.set(2,2,2);
+	scene.add(plane);
+
+  var cylinderGeometry = new THREE.CylinderGeometry(0.2,0.2,2,10);
+  var cylinderMaterial = new THREE.MeshBasicMaterial({color:'rgb(0,100,0)'});
+  var cylinder = new THREE.Mesh(cylinderGeometry,cylinderMaterial);
+  cylinder.translateX(2).translateY(0).translateZ(0);
+
+  scene.add(cylinder);
+
+
+//------------------SHAPES ANIMATION FUNCTIONS------------------//
+
+
+//cube animation
+
+function cubeAnimation(time)
+{
+  //rotation part
+
+  cube.translateY(-1);
+  cube.rotateX(0.1);
+  cube.translateY(1);
+
+  //scaling part (not working yet)
+  var counter = 0;
+if(counter<1)
+  {
+    cube.scale.set(1,1,1);
+    ++counter;
+  }
+if(counter>1) {
+  cube.scale.set(0,0,0);
+  --counter;
+}
+}
+//sphere animation
+
+function sphereAnimation(time)
+{
+  sphere.translateX(4);
+   sphere.rotateY(-0.1);
+   sphere.translateX(-4);
+}
+
+//cylinder Animation
+
+function cylinderAnimation(time)
+{
+  cylinder.translateX(-4);
+  cylinder.rotateY(0.1);
+  cylinder.translateX(4);
+}
+
+
+
+
+  //drawing the scene
+  var render = function()
+  {
+    renderer.render(scene, camera);
+  };
+
+  var begin = function()
+  {
+    requestAnimationFrame(begin);
+    render();
+    cubeAnimation();
+    sphereAnimation();
+    cylinderAnimation();
+  }
+
+  begin();
+
+  </script>
+
+</body>
+
+</html>

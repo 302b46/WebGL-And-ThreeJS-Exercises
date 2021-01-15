@@ -1,0 +1,72 @@
+<html>
+  <head>
+    <title>Input</title>
+  </head>
+  <body>
+  <canvas id="my_canvas" height="700" width="700" onclick="mouseFunction(event)"></canvas>
+   <script>
+      var canvas = document.getElementById('my_canvas');
+      var gl = canvas.getContext("experimental-webgl");
+      var vertices = [0.0,0];
+      var color = [1.0, 0.9, 1.0, 1];
+
+      var vertex_buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+      var vertCode =  'precision mediump float;'+
+                      'attribute vec2 position;'+
+                      'void main(void) { '+//pre-built function
+                      ' gl_Position = vec4(position, 0.0, 1.0);'+// vec4(position, 0.0, 0
+                      'gl_PointSize = 60.0;'+
+                      '}';
+
+      var fragCode =  'precision mediump float;'+
+                      'uniform vec4 u_color;'+
+                      'void main(void) {'+
+                      '  gl_FragColor = u_color;'+
+                      '}';
+
+      var vertShader = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(vertShader, vertCode);
+      gl.compileShader(vertShader);
+
+      var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(fragShader, fragCode);
+      gl.compileShader(fragShader);
+
+      var shaderProgram = gl.createProgram();
+      gl.attachShader(shaderProgram, vertShader);
+      gl.attachShader(shaderProgram, fragShader);
+      gl.linkProgram(shaderProgram);
+      gl.useProgram(shaderProgram);
+
+      var coord= gl.getAttribLocation(shaderProgram, "position");
+      gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0); //momken hena
+      gl.enableVertexAttribArray(coord);
+
+      gl.clearColor(0.0, 0.0, 0.0, 1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.drawArrays(gl.POINTS, 0, 1);
+
+function mouseFunction(e){
+        var clickXrelativToCanvas = e.pageX - e.target.offsetLeft;
+        var clickYrelativToCanvas = e.pageY - e.target.offsetTop;
+
+        var clickXinWebGLCoords = (clickXrelativToCanvas - canvas.width/2)   / (canvas.width*0.5);
+        var clickYinWebGLCoords = (canvas.height/2 - clickYrelativToCanvas) / (canvas.height*0.5);
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([clickXinWebGLCoords,clickYinWebGLCoords]), gl.STATIC_DRAW); //momken hena (nesheel wahed menhom)
+
+        color = [Math.random(), Math.random(), Math.random(), 1];
+        var colorLocation = gl.getUniformLocation(shaderProgram, "u_color");
+        gl.uniform4fv(colorLocation, color);
+
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.POINTS, 0, 1);
+      };
+    </script>
+  </body>
+</html>

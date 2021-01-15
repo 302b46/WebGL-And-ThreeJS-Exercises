@@ -1,0 +1,85 @@
+
+<!-- My scene -->
+	<canvas id="scene"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
+<script>
+
+//Get the height and the width of the window
+var ww = window.innerWidth,
+	wh = window.innerHeight;
+
+function init(){
+
+	/* WEBGL RENDERER */
+	renderer = new THREE.WebGLRenderer({canvas : document.getElementById('scene')});
+	renderer.setClearColor(0x3F3F3F);
+	renderer.setSize(ww,wh);
+
+	/* SCENE */
+	scene = new THREE.Scene();
+
+	/* CAMERA */
+	camera = new THREE.PerspectiveCamera(50, ww/wh, 1, 10000 );
+	camera.position.set(0, 250, 700);
+	camera.lookAt(new THREE.Vector3(0,0,0));
+	scene.add(camera);
+
+
+	/* LIGHT */
+	light = new THREE.DirectionalLight(0xffffff, 1);
+	light.position.set( 0, 500, 500 );
+	scene.add(light);
+
+	//Create all our shapes
+	createShapes();
+
+	//Render the scene
+	renderer.render(scene,camera);
+
+};
+
+function createShapes(){
+
+	material = new THREE.MeshLambertMaterial({color:255, wireframe: false});
+	material2 = new THREE.MeshLambertMaterial({color:255, wireframe: true});
+
+	/* BOXES */
+	geometryBox = new THREE.BoxGeometry(50,100,50);
+	box = new THREE.Mesh(geometryBox, material);
+	box.rotation.y = -Math.PI/6;
+	box.position.x = -300;
+	scene.add(box);
+
+	/* SPHERES */
+	geometrySphere = new THREE.SphereGeometry( 50, 32, 10 );
+	sphere = new THREE.Mesh(geometrySphere, material);
+	sphere.position.x = -150;
+	sphere.position.y = 120;
+	scene.add(sphere);
+
+	/* CYLINDERS */
+	geometryCylinder = new THREE.CylinderGeometry( 50, 50, 100, 32 );
+	cylinder = new THREE.Mesh(geometryCylinder, material);
+	scene.add(cylinder);
+
+	/* PYRAMID */
+	//This a bit weird because it's like a cylinder but with 4 faces
+	geometryPyramid = new THREE.CylinderGeometry(0, 50, 100, 4, false);
+	pyramid = new THREE.Mesh(geometryPyramid, material2);
+	pyramid.position.x = 150;
+	pyramid.position.y = 120;
+	scene.add(pyramid);
+
+	/* PLANE */
+	geometryPlane = new THREE.PlaneGeometry( 50, 100);
+	plane = new THREE.Mesh(geometryPlane, material);
+	plane.position.x = 300;
+	scene.add(plane);
+
+};
+
+//Init our scene
+init();
+
+</script>

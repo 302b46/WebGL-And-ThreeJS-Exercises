@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+   <body>
+      <canvas width = "400" height = "400" id = "my_Canvas"  onclick = "mouseFunction(event)"></canvas>
+
+      <script>
+         /*=================Creating a canvas=========================*/
+         var canvas = document.getElementById('my_Canvas');
+         gl = canvas.getContext('experimental-webgl');
+
+         /*===========Defining and storing the geometry==============*/
+
+         var vertices = [
+
+          -0.1,0.07,0.0,    //v1
+
+          -0.45,0.05,0.0,   //v2
+
+           0.05,-0.3,0.0,   //v3
+
+           0.5,0.055,0.0,   //v4
+
+           0.0,-0.2,0.0,    //v5
+
+          -0.2,-0.2,0.0,    //v6
+
+          -0.35,-0.5,0.0,   //v7
+
+           0.0,-0.3,0.0,    //v8
+
+           0.33,-0.5,0.0,   //v9
+
+           0.05,0.4,0.0   //v10
+
+ ];
+         var color = [
+        1.0, 1.0, 1.0,       //v1 (r,g,b)
+        0.0, 0.0, 0.0,      //v2 (r,g,b)
+        0.0, 0.0, 0.0,     //v3 (r,g,b)
+        0.0, 0.0, 0.0,    //v4 (r,g,b)
+        0.0, 0.0, 0.0,   //v5 (r,g,b)
+        0.0, 0.0, 0.0,   //v6 (r,g,b)
+        0.0, 0.0, 0.0,  //v7 (r,g,b)
+        0.0, 0.0, 0.0,  //v8 (r,g,b)
+        0.0, 0.0, 0.0,  //v9 (r,g,b)
+        0.0, 0.0, 0.0,  //v10 (r,g,b)
+
+
+];
+
+         //Create and store data into vertex buffer
+         var vertex_buffer = gl.createBuffer ();
+         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+         //Create and store data into color buffer
+         var color_buffer = gl.createBuffer ();
+         gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(color), gl.STATIC_DRAW);
+
+
+         /*==========================Shaders=========================*/
+
+         var vertCode = 'attribute vec3 position;'+
+            'uniform mat4 Mmatrix;'+
+            'attribute vec3 color;'+//the color of the point
+            'varying vec3 vColor;'+
+
+            'void main(void) { '+//pre-built function
+               'gl_Position = Mmatrix*vec4(position, 1.);'+
+               'vColor = color;'+
+            '}';
+
+         var fragCode = 'precision mediump float;'+
+            'varying vec3 vColor;'+
+            'void main(void) {'+
+               'gl_FragColor = vec4(vColor, 1.);'+
+            '}';
+
+         var vertShader = gl.createShader(gl.VERTEX_SHADER);
+         gl.shaderSource(vertShader, vertCode);
+         gl.compileShader(vertShader);
+
+         var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+         gl.shaderSource(fragShader, fragCode);
+         gl.compileShader(fragShader);
+
+         var shaderProgram = gl.createProgram();
+         gl.attachShader(shaderProgram, vertShader);
+         gl.attachShader(shaderProgram, fragShader);
+         gl.linkProgram(shaderProgram);
+
+         /*===========associating attributes to vertex shader ============*/
+
+         var Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
+         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+
+         var position = gl.getAttribLocation(shaderProgram, "position");
+         gl.vertexAttribPointer(position, 3, gl.FLOAT, false,0,0) ; //position
+         gl.enableVertexAttribArray(position);
+         gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+
+         var color = gl.getAttribLocation(shaderProgram, "color");
+         gl.vertexAttribPointer(color, 3, gl.FLOAT, false,0,0) ; //color
+         gl.enableVertexAttribArray(color);
+         gl.useProgram(shaderProgram);
+
+         /*========================= MATRIX ========================= */
+
+         var mov_matrix = [
+         1,0,0,0,
+         0,1,0,0,
+         0,0,1,0,
+         0,0,0,1];
+
+
+
+         /*=======================Rotation========================*/
+
+
+        var change = false; //flag
+
+         function rotate(m, distance) {
+
+           change = true;
+
+            var csine = Math.cos(distance);
+            var sine = Math.sin(distance);
+
+            var mv0 = m[0], mv4 = m[4], mv8 = m[8];
+
+            m[0] = csine *m[0]+sine *m[1];
+            m[4] = csine *m[4]+sine *m[5];
+
+           m[1] = csine *m[1]-sine *mv0;
+           m[5] = csine *m[5]-sine *mv4;
+
+         }
+
+
+          function rotateAnti(m,distance)
+          {
+            change = false;
+
+            var csine = Math.cos(distance);
+            var sine = Math.sin(distance);
+
+            var mv0 = m[0], mv4 = m[4], mv8 = m[8];
+
+            m[0] = csine *m[0]-sine *m[1];
+            m[4] = csine *m[4]-sine *m[5];
+
+           m[1] = csine *m[1]+sine *mv0;
+           m[5] = csine *m[5] +sine *mv4;
+
+          }
+
+
+
+
+
+
+
+         /*=================Drawing===========================*/
+          var time_old = 0;
+
+         function animate(time) {
+            var dt = time-time_old;
+            if(change==true)
+              rotate(mov_matrix,dt*0.002);
+            else rotateAnti(mov_matrix,dt*0.002);
+
+            time_old = time;
+
+            gl.clearColor(0.65, 0.65, 0.65, 1.0); //canvas color
+            gl.viewport(0.0, 0.0, canvas.width, canvas.height);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+
+            gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
+            gl.drawArrays(gl.TRIANGLE_FAN, 0, 10);
+
+          requestAnimationFrame(animate);
+
+         }
+         requestAnimationFrame(animate);
+
+            /*===========================Mouse Function===========================*/
+
+
+           function mouseFunction(e){
+
+                console.log(e);
+
+                change=!change;
+
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([vertices,Math.random(),Math.random(),Math.random()]), gl.STATIC_DRAW);
+
+
+               };
+
+
+
+
+
+
+
+      </script>
+   </body>
+</html>
